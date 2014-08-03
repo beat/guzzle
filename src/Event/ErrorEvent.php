@@ -25,7 +25,7 @@ class ErrorEvent extends AbstractTransferEvent
     public function __construct(
         TransactionInterface $transaction,
         RequestException $e,
-        $transferStats = []
+        $transferStats = array()
     ) {
         parent::__construct($transaction, $transferStats);
         $this->exception = $e;

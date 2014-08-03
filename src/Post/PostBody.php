@@ -18,10 +18,10 @@ class PostBody implements PostBodyInterface
     /** @var callable */
     private $aggregator;
 
-    private $fields = [];
+    private $fields = array();
 
     /** @var PostFileInterface[] */
-    private $files = [];
+    private $files = array();
     private $forceMultipart = false;
 
     /**
@@ -92,7 +92,9 @@ class PostBody implements PostBodyInterface
             return $this->fields;
         }
 
-        return (string) (new Query($this->fields))
+		$query = new Query($this->fields);
+
+        return (string) $query
             ->setEncodingType(Query::RFC1738)
             ->setAggregator($this->getAggregator());
     }
@@ -128,7 +130,7 @@ class PostBody implements PostBodyInterface
 
     public function clearFiles()
     {
-        $this->files = [];
+        $this->files = array();
         $this->mutate();
 
         return $this;
@@ -162,7 +164,7 @@ class PostBody implements PostBodyInterface
     public function detach()
     {
         $this->body = null;
-        $this->fields = $this->files = [];
+        $this->fields = $this->files = array();
 
         return $this;
     }
@@ -254,14 +256,16 @@ class PostBody implements PostBodyInterface
     {
         // Flatten the nested query string values using the correct aggregator
         if (!$this->fields) {
-            $fields = [];
+            $fields = array();
         } else {
-            $query = (string) (new Query($this->fields))
+			$newQuery = new Query($this->fields);
+
+            $query = (string) $newQuery
                 ->setEncodingType(false)
                 ->setAggregator($this->getAggregator());
 
             // Convert the flattened query string back into an array
-            $fields = [];
+            $fields = array();
             foreach (explode('&', $query) as $kvp) {
                 $parts = explode('=', $kvp, 2);
                 $fields[$parts[0]] = isset($parts[1]) ? $parts[1] : null;

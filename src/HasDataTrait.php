@@ -9,7 +9,7 @@ namespace GuzzleHttp;
 trait HasDataTrait
 {
     /** @var array */
-    protected $data = [];
+    protected $data = array();
 
     public function getIterator()
     {

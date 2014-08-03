@@ -13,8 +13,12 @@ class PostFile implements PostFileInterface
 {
     private $name;
     private $filename;
-    private $content;
-    private $headers = [];
+
+	/**
+	 * @var MetadataStreamInterface|mixed
+	 */
+	private $content;
+    private $headers = array();
 
     /**
      * @param null            $name     Name of the form field
@@ -28,7 +32,7 @@ class PostFile implements PostFileInterface
         $name,
         $content,
         $filename = null,
-        array $headers = []
+        array $headers = array()
     ) {
         $this->headers = $headers;
         $this->name = $name;
@@ -133,6 +137,7 @@ class PostFile implements PostFileInterface
      */
     private function hasHeader($name)
     {
-        return isset(array_change_key_case($this->headers)[strtolower($name)]);
+		$array = array_change_key_case($this->headers);
+        return isset($array[strtolower($name)]);
     }
 }

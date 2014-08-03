@@ -37,7 +37,9 @@ class CurlFactory
         unset($options['_headers']);
 
         // Add adapter options from the request's configuration options
-        if ($config = $request->getConfig()['curl']) {
+		$requestConfig = $request->getConfig();
+
+        if ($config = $requestConfig['curl']) {
             $options = $this->applyCustomCurlOptions($config, $options);
         }
 
@@ -121,8 +123,10 @@ class CurlFactory
         $request->getBody()->seek(0);
 
         // You can send the body as a string using curl's CURLOPT_POSTFIELDS
-        if (($size !== null && $size < 32768) ||
-            isset($request->getConfig()['curl']['body_as_string'])
+		$requestConfig = $request->getConfig();
+
+		if (($size !== null && $size < 32768) ||
+            isset($requestConfig['curl']['body_as_string'])
         ) {
             $options[CURLOPT_POSTFIELDS] = $request->getBody()->getContents();
             // Don't duplicate the Content-Length header
@@ -173,8 +177,10 @@ class CurlFactory
         }
     }
 
-    private function add_debug(
-        RequestInterface $request,
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function add_debug(
+        /** @noinspection PhpUnusedParameterInspection */
+		RequestInterface $request,
         RequestMediator $mediator,
         &$options,
         $value
@@ -185,9 +191,11 @@ class CurlFactory
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_proxy(
         RequestInterface $request,
-        RequestMediator $mediator,
+		/** @noinspection PhpUnusedParameterInspection */
+		RequestMediator $mediator,
         &$options,
         $value
     ) {
@@ -201,7 +209,9 @@ class CurlFactory
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_timeout(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -210,7 +220,9 @@ class CurlFactory
         $options[CURLOPT_TIMEOUT_MS] = $value * 1000;
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_connect_timeout(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -219,7 +231,9 @@ class CurlFactory
         $options[CURLOPT_CONNECTTIMEOUT_MS] = $value * 1000;
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_verify(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -242,7 +256,9 @@ class CurlFactory
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_cert(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -255,7 +271,9 @@ class CurlFactory
         $options[CURLOPT_SSLCERT] = $value;
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_ssl_key(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -273,7 +291,9 @@ class CurlFactory
         $options[CURLOPT_SSLKEY] = $value;
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_save_to(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -300,7 +320,7 @@ class CurlFactory
     private function applyCustomCurlOptions(array $config, array $options)
     {
         unset($config['body_as_string']);
-        $curlOptions = [];
+        $curlOptions = array();
 
         // Map curl constant strings to defined values
         foreach ($config as $key => $value) {

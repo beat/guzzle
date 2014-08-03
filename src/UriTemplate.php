@@ -47,7 +47,7 @@ class UriTemplate
 
         return preg_replace_callback(
             '/\{([^\}]+)\}/',
-            [$this, 'expandMatch'],
+			array($this, 'expandMatch'),
             $this->template
         );
     }
@@ -145,7 +145,7 @@ class UriTemplate
                                 // Nested arrays must allow for deeply nested
                                 // structures.
                                 $var = strtr(
-                                    http_build_query([$key => $var]),
+                                    http_build_query(array($key => $var)),
                                     $rfc1738to3986
                                 );
                             } else {
@@ -224,7 +224,12 @@ class UriTemplate
      */
     private function isAssoc(array $array)
     {
-        return $array && array_keys($array)[0] !== 0;
+		if ( ! $array ) {
+			return false;
+		}
+
+		$keys = array_keys($array);
+        return $array && $keys[0] !== 0;
     }
 
     /**

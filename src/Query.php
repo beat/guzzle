@@ -45,6 +45,7 @@ class Query extends Collection
         $q = new static();
 
         if ($urlEncoding !== true) {
+			/** @var Query $q */
             $q->setEncodingType($urlEncoding);
         }
 
@@ -155,7 +156,7 @@ class Query extends Collection
     public static function duplicateAggregator()
     {
         return function (array $data) {
-            return self::walkQuery($data, '', function ($key, $prefix) {
+            return Query::walkQuery($data, '', function ($key, $prefix) {
                 return is_int($key) ? $prefix : "{$prefix}[{$key}]";
             });
         };
@@ -173,7 +174,7 @@ class Query extends Collection
     public static function phpAggregator($numericIndices = true)
     {
         return function (array $data) use ($numericIndices) {
-            return self::walkQuery(
+            return Query::walkQuery(
                 $data,
                 '',
                 function ($key, $prefix) use ($numericIndices) {
@@ -197,7 +198,7 @@ class Query extends Collection
      */
     public static function walkQuery(array $query, $keyPrefix, callable $prefixer)
     {
-        $result = [];
+        $result = array();
         foreach ($query as $key => $value) {
             if ($keyPrefix) {
                 $key = $prefixer($key, $keyPrefix);

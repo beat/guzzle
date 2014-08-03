@@ -14,7 +14,7 @@ class Url
     private $password;
     private $path = '';
     private $fragment;
-    private static $defaultPorts = ['http' => 80, 'https' => 443, 'ftp' => 21];
+    private static $defaultPorts = array('http' => 80, 'https' => 443, 'ftp' => 21);
 
     /** @var Query Query part of the URL */
     private $query;
@@ -290,8 +290,8 @@ class Url
      */
     public function setPath($path)
     {
-        static $search  = [' ',   '?'];
-        static $replace = ['%20', '%3F'];
+        static $search  = array(' ',   '?');
+        static $replace = array('%20', '%3F');
         $this->path = str_replace($search, $replace, $path);
 
         return $this;
@@ -305,14 +305,14 @@ class Url
      */
     public function removeDotSegments()
     {
-        static $noopPaths = ['' => true, '/' => true, '*' => true];
-        static $ignoreSegments = ['.' => true, '..' => true];
+        static $noopPaths = array('' => true, '/' => true, '*' => true);
+        static $ignoreSegments = array('.' => true, '..' => true);
 
         if (isset($noopPaths[$this->path])) {
             return $this;
         }
 
-        $results = [];
+        $results = array();
         $segments = $this->getPathSegments();
         foreach ($segments as $segment) {
             if ($segment == '..') {

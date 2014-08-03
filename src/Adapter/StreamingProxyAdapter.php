@@ -29,7 +29,8 @@ class StreamingProxyAdapter implements AdapterInterface
 
     public function send(TransactionInterface $transaction)
     {
-        return $transaction->getRequest()->getConfig()['stream']
+		$config = $transaction->getRequest()->getConfig();
+		return $config['stream']
             ? $this->streamingAdapter->send($transaction)
             : $this->defaultAdapter->send($transaction);
     }

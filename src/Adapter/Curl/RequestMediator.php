@@ -53,9 +53,9 @@ class RequestMediator
      *
      * @return int
      */
-    public function receiveResponseHeader($curl, $header)
+    public function receiveResponseHeader( /** @noinspection PhpUnusedParameterInspection */ $curl, $header)
     {
-        static $normalize = ["\r", "\n"];
+        static $normalize = array("\r", "\n");
         $length = strlen($header);
         $header = str_replace($normalize, '', $header);
 
@@ -69,7 +69,7 @@ class RequestMediator
             $this->statusCode = $startLine[1];
             $this->reasonPhrase = isset($startLine[2]) ? $startLine[2] : null;
             $this->protocolVersion = substr($startLine[0], -3);
-            $this->headers = [];
+            $this->headers = array();
         } elseif ($pos = strpos($header, ':')) {
             $this->headers[substr($header, 0, $pos)][] = substr($header, $pos + 1);
         } elseif ($header == '' && $this->statusCode >= 200) {
@@ -77,10 +77,10 @@ class RequestMediator
                 $this->statusCode,
                 $this->headers,
                 $this->body,
-                [
+				array(
                     'protocol_version' => $this->protocolVersion,
                     'reason_phrase'    => $this->reasonPhrase
-                ]
+				)
             );
             $this->headers = $this->body = null;
             $this->transaction->setResponse($response);
@@ -99,7 +99,7 @@ class RequestMediator
      *
      * @return int
      */
-    public function writeResponseBody($curl, $write)
+    public function writeResponseBody( /** @noinspection PhpUnusedParameterInspection */ $curl, $write)
     {
         if (!($response = $this->transaction->getResponse())) {
             return 0;
@@ -123,7 +123,7 @@ class RequestMediator
      *
      * @return string
      */
-    public function readRequestBody($ch, $fd, $length)
+    public function readRequestBody( /** @noinspection PhpUnusedParameterInspection */ $ch, $fd, $length)
     {
         return (string) $this->transaction->getRequest()->getBody()->read($length);
     }

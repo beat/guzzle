@@ -3,7 +3,8 @@
 namespace GuzzleHttp;
 
 use GuzzleHttp\Adapter\Curl\MultiAdapter;
-use GuzzleHttp\Event\HasEmitterTrait;
+use GuzzleHttp\Event\Emitter;
+use GuzzleHttp\Event\EmitterInterface;
 use GuzzleHttp\Adapter\FakeParallelAdapter;
 use GuzzleHttp\Adapter\ParallelAdapterInterface;
 use GuzzleHttp\Adapter\AdapterInterface;
@@ -22,7 +23,20 @@ use GuzzleHttp\Message\RequestInterface;
  */
 class Client implements ClientInterface
 {
-    use HasEmitterTrait;
+    //BB use HasEmitterTrait;
+
+	/** @var EmitterInterface */
+	private $emitter;
+
+	public function getEmitter()
+	{
+		if (!$this->emitter) {
+			$this->emitter = new Emitter();
+		}
+
+		return $this->emitter;
+	}
+	//BB end use HasEmitterTrait;
 
     const DEFAULT_CONCURRENCY = 25;
 
@@ -71,8 +85,10 @@ class Client implements ClientInterface
      *     - defaults: Default request options to apply to each request
      *     - emitter: Event emitter used for request events
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = array())
     {
+		new functions();		//BB to load functions!
+
         $this->configureBaseUrl($config);
         $this->configureDefaults($config);
         $this->configureAdapter($config);
@@ -92,7 +108,8 @@ class Client implements ClientInterface
         if (!$defaultAgent) {
             $defaultAgent = 'Guzzle/' . self::VERSION;
             if (extension_loaded('curl')) {
-                $defaultAgent .= ' curl/' . curl_version()['version'];
+				$curlVersion = curl_version();
+                $defaultAgent .= ' curl/' . $curlVersion['version'];
             }
             $defaultAgent .= ' PHP/' . PHP_VERSION;
         }
@@ -106,7 +123,7 @@ class Client implements ClientInterface
             $this,
             $name,
             $arguments,
-            ['getEventDispatcher' => 'getEmitter']
+			array('getEventDispatcher' => 'getEmitter')
         );
     }
 
@@ -127,7 +144,7 @@ class Client implements ClientInterface
         return (string) $this->baseUrl;
     }
 
-    public function createRequest($method, $url = null, array $options = [])
+    public function createRequest($method, $url = null, array $options = array())
     {
         // Merge in default options
         $options = array_replace_recursive($this->defaults, $options);
@@ -144,37 +161,37 @@ class Client implements ClientInterface
         return $request;
     }
 
-    public function get($url = null, $options = [])
+    public function get($url = null, $options = array())
     {
         return $this->send($this->createRequest('GET', $url, $options));
     }
 
-    public function head($url = null, array $options = [])
+    public function head($url = null, array $options = array())
     {
         return $this->send($this->createRequest('HEAD', $url, $options));
     }
 
-    public function delete($url = null, array $options = [])
+    public function delete($url = null, array $options = array())
     {
         return $this->send($this->createRequest('DELETE', $url, $options));
     }
 
-    public function put($url = null, array $options = [])
+    public function put($url = null, array $options = array())
     {
         return $this->send($this->createRequest('PUT', $url, $options));
     }
 
-    public function patch($url = null, array $options = [])
+    public function patch($url = null, array $options = array())
     {
         return $this->send($this->createRequest('PATCH', $url, $options));
     }
 
-    public function post($url = null, array $options = [])
+    public function post($url = null, array $options = array())
     {
         return $this->send($this->createRequest('POST', $url, $options));
     }
 
-    public function options($url = null, array $options = [])
+    public function options($url = null, array $options = array())
     {
         return $this->send($this->createRequest('OPTIONS', $url, $options));
     }
@@ -195,7 +212,7 @@ class Client implements ClientInterface
         }
     }
 
-    public function sendAll($requests, array $options = [])
+    public function sendAll($requests, array $options = array())
     {
         if (!($requests instanceof TransactionIterator)) {
             $requests = new TransactionIterator($requests, $this, $options);
@@ -216,11 +233,11 @@ class Client implements ClientInterface
      */
     protected function getDefaultOptions()
     {
-        $settings = [
+        $settings = array(
             'allow_redirects' => true,
             'exceptions'      => true,
             'verify'          => __DIR__ . '/cacert.pem'
-        ];
+		);
 
         // Use the bundled cacert if it is a regular file, or set to true if
         // using a phar file (because curL and the stream wrapper can't read
@@ -332,13 +349,16 @@ class Client implements ClientInterface
 
         // Add the default user-agent header
         if (!isset($this->defaults['headers'])) {
-            $this->defaults['headers'] = [
+            $this->defaults['headers'] = array(
                 'User-Agent' => static::getDefaultUserAgent()
-            ];
-        } elseif (!isset(array_change_key_case($this->defaults['headers'])['user-agent'])) {
-            // Add the User-Agent header if one was not already set
-            $this->defaults['headers']['User-Agent'] = static::getDefaultUserAgent();
-        }
+			);
+        } else {
+			$defaultsHeaders = array_change_key_case($this->defaults['headers']);
+			if (!isset($defaultsHeaders['user-agent'])) {
+				// Add the User-Agent header if one was not already set
+				$this->defaults['headers']['User-Agent'] = static::getDefaultUserAgent();
+			}
+		}
     }
 
     private function configureAdapter(&$config)

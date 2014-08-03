@@ -33,10 +33,10 @@ class MultiAdapter implements AdapterInterface, ParallelAdapterInterface
     private $messageFactory;
 
     /** @var array Array of curl multi handles */
-    private $multiHandles = [];
+    private $multiHandles = array();
 
     /** @var array Array of curl multi handles */
-    private $multiOwned = [];
+    private $multiOwned = array();
 
     /** @var double */
     private $selectTimeout;
@@ -56,7 +56,7 @@ class MultiAdapter implements AdapterInterface, ParallelAdapterInterface
      */
     public function __construct(
         MessageFactoryInterface $messageFactory,
-        array $options = []
+        array $options = array()
     ) {
         $this->messageFactory = $messageFactory;
         $this->curlFactory = isset($options['handle_factory'])
@@ -215,7 +215,7 @@ class MultiAdapter implements AdapterInterface, ParallelAdapterInterface
         $request = $transaction->getRequest();
         try {
             // Send curl stats along if they are available
-            $stats = ['curl_result' => $curl['result']] + $info;
+            $stats = array('curl_result' => $curl['result']) + $info;
             RequestEvents::emitError(
                 $transaction,
                 new RequestException(

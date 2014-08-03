@@ -64,7 +64,7 @@ final class RequestEvents
      */
     public static function emitComplete(
         TransactionInterface $transaction,
-        array $stats = []
+        array $stats = array()
     ) {
         $request = $transaction->getRequest();
         $transaction->getResponse()->setEffectiveUrl($request->getUrl());
@@ -105,7 +105,7 @@ final class RequestEvents
     public static function emitError(
         TransactionInterface $transaction,
         \Exception $e,
-        array $stats = []
+        array $stats = array()
     ) {
         $request = $transaction->getRequest();
 
@@ -147,12 +147,12 @@ final class RequestEvents
     ) {
         foreach ($events as $name) {
             if (!isset($options[$name])) {
-                $options[$name] = [$handler];
+                $options[$name] = array($handler);
             } elseif (is_callable($options[$name])) {
-                $options[$name] = [$options[$name], $handler];
+                $options[$name] = array($options[$name], $handler);
             } elseif (is_array($options[$name])) {
                 if (isset($options[$name]['fn'])) {
-                    $options[$name] = [$options[$name], $handler];
+                    $options[$name] = array($options[$name], $handler);
                 } else {
                     $options[$name][] = $handler;
                 }

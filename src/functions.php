@@ -6,7 +6,10 @@ use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Event\ErrorEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\UriTemplate;
+
+class functions {
+	//BB This is only for loading these namespaced functions.
+}
 
 if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
 
@@ -21,7 +24,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function request($method, $url, array $options = [])
+    function request($method, $url, array $options = array())
     {
         static $client;
         if (!$client) {
@@ -39,7 +42,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function get($url, array $options = [])
+    function get($url, array $options = array())
     {
         return request('GET', $url, $options);
     }
@@ -52,7 +55,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function head($url, array $options = [])
+    function head($url, array $options = array())
     {
         return request('HEAD', $url, $options);
     }
@@ -65,7 +68,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function delete($url, array $options = [])
+    function delete($url, array $options = array())
     {
         return request('DELETE', $url, $options);
     }
@@ -78,7 +81,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function post($url, array $options = [])
+    function post($url, array $options = array())
     {
         return request('POST', $url, $options);
     }
@@ -91,7 +94,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function put($url, array $options = [])
+    function put($url, array $options = array())
     {
         return request('PUT', $url, $options);
     }
@@ -104,7 +107,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function patch($url, array $options = [])
+    function patch($url, array $options = array())
     {
         return request('PATCH', $url, $options);
     }
@@ -117,7 +120,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *
      * @return ResponseInterface
      */
-    function options($url, array $options = [])
+    function options($url, array $options = array())
     {
         return request('OPTIONS', $url, $options);
     }
@@ -141,7 +144,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      *     or a {@see GuzzleHttp\Exception\RequestException} if it failed.
      * @throws \InvalidArgumentException if the event format is incorrect.
      */
-    function batch(ClientInterface $client, $requests, array $options = [])
+    function batch(ClientInterface $client, $requests, array $options = array())
     {
         $hash = new \SplObjectStorage();
         foreach ($requests as $request) {
@@ -153,14 +156,15 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
         // hash.
         $options = RequestEvents::convertEventArray(
             $options,
-            ['complete', 'error'],
-            [
+			array('complete', 'error'),
+            array(
                 'priority' => RequestEvents::EARLY,
                 'once' => true,
                 'fn' => function ($e) use ($hash) {
-                    $hash[$e->getRequest()] = $e;
+						/** @noinspection PhpUndefinedMethodInspection */
+						$hash[$e->getRequest()] = $e;
                 }
-            ]
+			)
         );
 
         // Send the requests in parallel and aggregate the results.
@@ -168,6 +172,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
 
         // Update the received value for any of the intercepted requests.
         foreach ($hash as $request) {
+			/** @var \GuzzleHttp\Event\ErrorEvent[] $hash */
             if ($hash[$request] instanceof CompleteEvent) {
                 $hash[$request] = $hash[$request]->getResponse();
             } elseif ($hash[$request] instanceof ErrorEvent) {
@@ -248,7 +253,7 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
             } elseif (isset($current[$key])) {
                 $current =& $current[$key];
             } else {
-                $current[$key] = [];
+                $current[$key] = array();
                 $current =& $current[$key];
             }
         }
@@ -265,7 +270,8 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
     function uri_template($template, array $variables)
     {
         if (function_exists('\\uri_template')) {
-            return \uri_template($template, $variables);
+			/** @noinspection PhpUndefinedFunctionInspection */
+			return \uri_template($template, $variables);
         }
 
         static $uriTemplate;
@@ -292,13 +298,13 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
      */
     function json_decode($json, $assoc = false, $depth = 512, $options = 0)
     {
-        static $jsonErrors = [
+        static $jsonErrors = array(
             JSON_ERROR_DEPTH => 'JSON_ERROR_DEPTH - Maximum stack depth exceeded',
             JSON_ERROR_STATE_MISMATCH => 'JSON_ERROR_STATE_MISMATCH - Underflow or the modes mismatch',
             JSON_ERROR_CTRL_CHAR => 'JSON_ERROR_CTRL_CHAR - Unexpected control character found',
             JSON_ERROR_SYNTAX => 'JSON_ERROR_SYNTAX - Syntax error, malformed JSON',
             JSON_ERROR_UTF8 => 'JSON_ERROR_UTF8 - Malformed UTF-8 characters, possibly incorrectly encoded'
-        ];
+		);
 
         $data = \json_decode($json, $assoc, $depth, $options);
 
@@ -333,6 +339,6 @@ if (!defined('GUZZLE_FUNCTIONS_VERSION')) {
 
         trigger_error($message, E_USER_DEPRECATED);
 
-        return call_user_func_array([$object, $map[$name]], $arguments);
+        return call_user_func_array(array($object, $map[$name]), $arguments);
     }
 }

@@ -41,7 +41,7 @@ abstract class AbstractTransferEvent extends AbstractRequestEvent
      */
     public function __construct(
         TransactionInterface $transaction,
-        $transferInfo = []
+        $transferInfo = array()
     ) {
         parent::__construct($transaction);
         $this->transferInfo = $transferInfo;

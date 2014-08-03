@@ -20,10 +20,10 @@ namespace GuzzleHttp\Event;
 class Emitter implements EmitterInterface
 {
     /** @var array */
-    private $listeners = [];
+    private $listeners = array();
 
     /** @var array */
-    private $sorted = [];
+    private $sorted = array();
 
     public function on($eventName, callable $listener, $priority = 0)
     {
@@ -43,12 +43,13 @@ class Emitter implements EmitterInterface
 
     public function once($eventName, callable $listener, $priority = 0)
     {
+		$that	=	$this;
         $onceListener = function (
             EventInterface $event,
             $eventName
-        ) use (&$onceListener, $eventName, $listener, $priority) {
-            $this->removeListener($eventName, $onceListener);
-            $listener($event, $eventName, $this);
+        ) use (&$onceListener, $eventName, $listener, $priority, $that) {
+            $that->removeListener($eventName, $onceListener);
+            $listener($event, $eventName, $that);
         };
 
         $this->on($eventName, $onceListener, $priority);
@@ -85,7 +86,7 @@ class Emitter implements EmitterInterface
         // Return the listeners for a specific event, sorted in priority order
         if (!isset($this->sorted[$eventName])) {
             if (!isset($this->listeners[$eventName])) {
-                return [];
+                return array();
             } else {
                 krsort($this->listeners[$eventName]);
                 $this->sorted[$eventName] = call_user_func_array(
@@ -119,14 +120,14 @@ class Emitter implements EmitterInterface
                 foreach ($listeners as $listener) {
                     $this->on(
                         $eventName,
-                        [$subscriber, $listener[0]],
+						array($subscriber, $listener[0]),
                         isset($listener[1]) ? $listener[1] : 0
                     );
                 }
             } else {
                 $this->on(
                     $eventName,
-                    [$subscriber, $listeners[0]],
+					array($subscriber, $listeners[0]),
                     isset($listeners[1]) ? $listeners[1] : 0
                 );
             }
@@ -146,12 +147,12 @@ class Emitter implements EmitterInterface
             $this,
             $name,
             $arguments,
-            [
+			array(
                 'addSubscriber'    => 'attach',
                 'removeSubscriber' => 'detach',
                 'addListener'      => 'on',
                 'dispatch'         => 'emit'
-            ]
+			)
         );
     }
 }

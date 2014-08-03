@@ -26,10 +26,10 @@ class CurlAdapter implements AdapterInterface
     private $messageFactory;
 
     /** @var array Array of curl easy handles */
-    private $handles = [];
+    private $handles = array();
 
     /** @var array Array of owned curl easy handles */
-    private $ownedHandles = [];
+    private $ownedHandles = array();
 
     /** @var int Total number of idle handles to keep in cache */
     private $maxHandles;
@@ -48,9 +48,9 @@ class CurlAdapter implements AdapterInterface
      */
     public function __construct(
         MessageFactoryInterface $messageFactory,
-        array $options = []
+        array $options = array()
     ) {
-        $this->handles = $this->ownedHandles = [];
+        $this->handles = $this->ownedHandles = array();
         $this->messageFactory = $messageFactory;
         $this->curlFactory = isset($options['handle_factory'])
             ? $options['handle_factory']

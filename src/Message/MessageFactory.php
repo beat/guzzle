@@ -2,7 +2,7 @@
 
 namespace GuzzleHttp\Message;
 
-use GuzzleHttp\Event\ListenerAttacherTrait;
+use GuzzleHttp\Event\HasEmitterInterface;
 use GuzzleHttp\Post\PostFileInterface;
 use GuzzleHttp\Subscriber\Cookie;
 use GuzzleHttp\Cookie\CookieJar;
@@ -20,7 +20,87 @@ use GuzzleHttp\Url;
  */
 class MessageFactory implements MessageFactoryInterface
 {
-    use ListenerAttacherTrait;
+    //BB use ListenerAttacherTrait;
+
+	/**
+	 * Attaches event listeners and properly sets their priorities and whether
+	 * or not they are are only executed once.
+	 *
+	 * @param HasEmitterInterface $object    Object that has the event emitter.
+	 * @param array               $listeners Array of hashes representing event
+	 *                                       event listeners. Each item contains
+	 *                                       "name", "fn", "priority", & "once".
+	 */
+	private function attachListeners(HasEmitterInterface $object, array $listeners)
+	{
+		$emitter = $object->getEmitter();
+		foreach ($listeners as $el) {
+			if ($el['once']) {
+				$emitter->once($el['name'], $el['fn'], $el['priority']);
+			} else {
+				$emitter->on($el['name'], $el['fn'], $el['priority']);
+			}
+		}
+	}
+
+	/**
+	 * Extracts the allowed events from the provided array, and ignores anything
+	 * else in the array. The event listener must be specified as a callable or
+	 * as an array of event listener data ("name", "fn", "priority", "once").
+	 *
+	 * @param array $source Array containing callables or hashes of data to be
+	 *                      prepared as event listeners.
+	 * @param array $events Names of events to look for in the provided $source
+	 *                      array. Other keys are ignored.
+	 * @return array
+	 */
+	private function prepareListeners(array $source, array $events)
+	{
+		$listeners = array();
+		foreach ($events as $name) {
+			if (isset($source[$name])) {
+				$this->buildListener($name, $source[$name], $listeners);
+			}
+		}
+
+		return $listeners;
+	}
+
+	/**
+	 * Creates a complete event listener definition from the provided array of
+	 * listener data. Also works recursively if more than one listeners are
+	 * contained in the provided array.
+	 *
+	 * @param string         $name      Name of the event the listener is for.
+	 * @param array|callable $data      Event listener data to prepare.
+	 * @param array          $listeners Array of listeners, passed by reference.
+	 *
+	 * @throws \InvalidArgumentException if the event data is malformed.
+	 */
+	private function buildListener($name, $data, &$listeners)
+	{
+		static $defaults = array('priority' => 0, 'once' => false);
+
+		// If a callable is provided, normalize it to the array format.
+		if (is_callable($data)) {
+			$data = array('fn' => $data);
+		}
+
+		// Prepare the listener and add it to the array, recursively.
+		if (isset($data['fn'])) {
+			$data['name'] = $name;
+			$listeners[] = $data + $defaults;
+		} elseif (is_array($data)) {
+			foreach ($data as $listenerData) {
+				$this->buildListener($name, $listenerData, $listeners);
+			}
+		} else {
+			throw new \InvalidArgumentException('Each event listener must be a '
+				. 'callable or an associative array containing a "fn" key.');
+		}
+	}
+
+	//BB end of ListenerAttacherTrait
 
     /** @var HttpError */
     private $errorPlugin;
@@ -29,7 +109,7 @@ class MessageFactory implements MessageFactoryInterface
     private $redirectPlugin;
 
     /** @var array */
-    protected static $classMethods = [];
+    protected static $classMethods = array();
 
     public function __construct()
     {
@@ -39,9 +119,9 @@ class MessageFactory implements MessageFactoryInterface
 
     public function createResponse(
         $statusCode,
-        array $headers = [],
+        array $headers = array(),
         $body = null,
-        array $options = []
+        array $options = array()
     ) {
         if (null !== $body) {
             $body = Stream\create($body);
@@ -50,7 +130,7 @@ class MessageFactory implements MessageFactoryInterface
         return new Response($statusCode, $headers, $body, $options);
     }
 
-    public function createRequest($method, $url, array $options = [])
+    public function createRequest($method, $url, array $options = array())
     {
         // Handle the request protocol version option that needs to be
         // specified in the request constructor.
@@ -59,8 +139,8 @@ class MessageFactory implements MessageFactoryInterface
             unset($options['version']);
         }
 
-        $request = new Request($method, $url, [], null,
-            isset($options['config']) ? $options['config'] : []);
+        $request = new Request($method, $url, array(), null,
+            isset($options['config']) ? $options['config'] : array());
 
         unset($options['config']);
 
@@ -69,7 +149,7 @@ class MessageFactory implements MessageFactoryInterface
             !isset($options['body']) &&
             !isset($options['json'])
         ) {
-            $options['body'] = [];
+            $options['body'] = array();
         }
 
         if ($options) {
@@ -113,13 +193,13 @@ class MessageFactory implements MessageFactoryInterface
         return $this->createRequest(
             $data['method'],
             Url::buildUrl($data['request_url']),
-            [
+			array(
                 'headers' => $data['headers'],
                 'body' => $data['body'] === '' ? null : $data['body'],
-                'config' => [
+                'config' => array(
                     'protocol_version' => $data['protocol_version']
-                ]
-            ]
+				)
+			)
         );
     }
 
@@ -132,8 +212,8 @@ class MessageFactory implements MessageFactoryInterface
      */
     protected function addPostData(RequestInterface $request, array $body)
     {
-        static $fields = ['string' => true, 'array' => true, 'NULL' => true,
-            'boolean' => true, 'double' => true, 'integer' => true];
+        static $fields = array('string' => true, 'array' => true, 'NULL' => true,
+            'boolean' => true, 'double' => true, 'integer' => true);
 
         $post = new PostBody();
         foreach ($body as $key => $value) {
@@ -151,12 +231,12 @@ class MessageFactory implements MessageFactoryInterface
 
     protected function applyOptions(
         RequestInterface $request,
-        array $options = []
+        array $options = array()
     ) {
         // Values specified in the config map are passed to request options
-        static $configMap = ['connect_timeout' => 1, 'timeout' => 1,
+        static $configMap = array('connect_timeout' => 1, 'timeout' => 1,
             'verify' => 1, 'ssl_key' => 1, 'cert' => 1, 'proxy' => 1,
-            'debug' => 1, 'save_to' => 1, 'stream' => 1, 'expect' => 1];
+            'debug' => 1, 'save_to' => 1, 'stream' => 1, 'expect' => 1);
 
         // Take the class of the instance, not the parent
         $selfClass = get_class($this);
@@ -185,7 +265,8 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
-    private function add_body(RequestInterface $request, $value)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function add_body(RequestInterface $request, $value)
     {
         if ($value !== null) {
             if (is_array($value)) {
@@ -196,13 +277,14 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_allow_redirects(RequestInterface $request, $value)
     {
-        static $defaultRedirect = [
+        static $defaultRedirect = array(
             'max'     => 5,
             'strict'  => false,
             'referer' => false
-        ];
+		);
 
         if ($value === false) {
             return;
@@ -218,18 +300,21 @@ class MessageFactory implements MessageFactoryInterface
             $value += $defaultRedirect;
         }
 
-        $request->getConfig()['redirect'] = $value;
+        $config = $request->getConfig();
+        $config['redirect'] = $value;
         $request->getEmitter()->attach($this->redirectPlugin);
     }
 
-    private function add_exceptions(RequestInterface $request, $value)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function add_exceptions(RequestInterface $request, $value)
     {
         if ($value === true) {
             $request->getEmitter()->attach($this->errorPlugin);
         }
     }
 
-    private function add_auth(RequestInterface $request, $value)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function add_auth(RequestInterface $request, $value)
     {
         if (!$value) {
             return;
@@ -255,6 +340,7 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_query(RequestInterface $request, $value)
     {
         if ($value instanceof Query) {
@@ -276,6 +362,7 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_headers(RequestInterface $request, $value)
     {
         if (!is_array($value)) {
@@ -290,6 +377,7 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_cookies(RequestInterface $request, $value)
     {
         if ($value === true) {
@@ -310,6 +398,7 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_events(RequestInterface $request, $value)
     {
         if (!is_array($value)) {
@@ -317,10 +406,11 @@ class MessageFactory implements MessageFactoryInterface
         }
 
         $this->attachListeners($request, $this->prepareListeners($value,
-            ['before', 'complete', 'error', 'headers']
+			array('before', 'complete', 'error', 'headers')
         ));
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_subscribers(RequestInterface $request, $value)
     {
         if (!is_array($value)) {
@@ -333,6 +423,7 @@ class MessageFactory implements MessageFactoryInterface
         }
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_json(RequestInterface $request, $value)
     {
         if (!$request->hasHeader('Content-Type')) {

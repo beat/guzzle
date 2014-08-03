@@ -27,7 +27,7 @@ class Prepare implements SubscriberInterface
 {
     public function getEvents()
     {
-        return ['before' => ['onBefore', RequestEvents::PREPARE_REQUEST]];
+        return array('before' => array('onBefore', RequestEvents::PREPARE_REQUEST));
     }
 
     public function onBefore(BeforeEvent $event)
@@ -108,7 +108,8 @@ class Prepare implements SubscriberInterface
             return;
         }
 
-        $expect = $request->getConfig()['expect'];
+		$config = $request->getConfig();
+        $expect = $config['expect'];
 
         // Return if disabled or if you're not using HTTP/1.1
         if ($expect === false || $request->getProtocolVersion() !== '1.1') {

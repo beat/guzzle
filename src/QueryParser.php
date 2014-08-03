@@ -29,7 +29,7 @@ class QueryParser
             return;
         }
 
-        $result = [];
+        $result = array();
         $this->duplicates = false;
         $this->numericIndices = true;
         $decoder = self::getDecoder($urlEncoding);
@@ -51,7 +51,7 @@ class QueryParser
             } else {
                 $this->duplicates = true;
                 if (!is_array($result[$key])) {
-                    $result[$key] = [$result[$key]];
+                    $result[$key] = array($result[$key]);
                 }
                 $result[$key][] = $value;
             }
@@ -142,7 +142,7 @@ class QueryParser
         if (!isset($node[$key])) {
             $node[$key] = null;
         } elseif (!is_array($node[$key])) {
-            $node[$key] = [$node[$key]];
+            $node[$key] = array($node[$key]);
         }
     }
 

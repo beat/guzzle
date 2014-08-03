@@ -2,7 +2,8 @@
 
 namespace GuzzleHttp\Message;
 
-use GuzzleHttp\Event\HasEmitterTrait;
+use GuzzleHttp\Event\Emitter;
+use GuzzleHttp\Event\EmitterInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Subscriber\Prepare;
 use GuzzleHttp\Url;
@@ -12,7 +13,20 @@ use GuzzleHttp\Url;
  */
 class Request extends AbstractMessage implements RequestInterface
 {
-    use HasEmitterTrait;
+	//BB use HasEmitterTrait;
+
+	/** @var EmitterInterface */
+	private $emitter;
+
+	public function getEmitter()
+	{
+		if (!$this->emitter) {
+			$this->emitter = new Emitter();
+		}
+
+		return $this->emitter;
+	}
+	//BB end use HasEmitterTrait;
 
     /** @var Url HTTP Url */
     private $url;
@@ -36,9 +50,9 @@ class Request extends AbstractMessage implements RequestInterface
     public function __construct(
         $method,
         $url,
-        $headers = [],
+        $headers = array(),
         $body = null,
-        array $options = []
+        array $options = array()
     ) {
         $this->setUrl($url);
         $this->method = strtoupper($method);

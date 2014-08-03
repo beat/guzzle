@@ -56,7 +56,8 @@ class StreamAdapter implements AdapterInterface
         $request = $transaction->getRequest();
         $stream = $this->createStream($request, $http_response_header);
 
-        if (!$request->getConfig()['stream']) {
+		$config = $request->getConfig();
+        if (!$config['stream']) {
             $stream = $this->getSaveToBody($request, $stream);
         }
 
@@ -69,7 +70,8 @@ class StreamAdapter implements AdapterInterface
      */
     private function getSaveToBody(RequestInterface $request, $stream)
     {
-        if ($saveTo = $request->getConfig()['save_to']) {
+		$config = $request->getConfig();
+		if ($saveTo = $config['save_to']) {
             // Stream the response into the destination stream
             $saveTo = is_string($saveTo)
                 ? new Stream\LazyOpenStream($saveTo, 'r+')
@@ -95,7 +97,7 @@ class StreamAdapter implements AdapterInterface
         $stream
     ) {
         $parts = explode(' ', array_shift($headers), 3);
-        $options = ['protocol_version' => substr($parts[0], -3)];
+        $options = array('protocol_version' => substr($parts[0], -3));
         if (isset($parts[2])) {
             $options['reason_phrase'] = $parts[2];
         }
@@ -115,7 +117,7 @@ class StreamAdapter implements AdapterInterface
 
     private function headersFromLines(array $lines)
     {
-        $responseHeaders = [];
+        $responseHeaders = array();
 
         foreach ($lines as $line) {
             $headerParts = explode(':', $line, 2);
@@ -177,7 +179,7 @@ class StreamAdapter implements AdapterInterface
             $methods = array_flip(get_class_methods(__CLASS__));
         }
 
-        $params = [];
+        $params = array();
         $options = $this->getDefaultOptions($request);
         foreach ($request->getConfig()->toArray() as $key => $value) {
             $method = "add_{$key}";
@@ -204,19 +206,20 @@ class StreamAdapter implements AdapterInterface
             $headers .= $name . ': ' . implode(', ', $values) . "\r\n";
         }
 
-        return [
-            'http' => [
+        return array(
+            'http' => array(
                 'method'           => $request->getMethod(),
                 'header'           => trim($headers),
                 'protocol_version' => $request->getProtocolVersion(),
                 'ignore_errors'    => true,
                 'follow_location'  => 0,
                 'content'          => (string) $request->getBody()
-            ]
-        ];
+			)
+		);
     }
 
-    private function add_proxy(RequestInterface $request, &$options, $value, &$params)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function add_proxy(RequestInterface $request, &$options, $value, /** @noinspection PhpUnusedParameterInspection */ &$params)
     {
         if (!is_array($value)) {
             $options['http']['proxy'] = $value;
@@ -230,12 +233,14 @@ class StreamAdapter implements AdapterInterface
         }
     }
 
-    private function add_timeout(RequestInterface $request, &$options, $value, &$params)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+    private function add_timeout(/** @noinspection PhpUnusedParameterInspection */ RequestInterface $request, &$options, $value, /** @noinspection PhpUnusedParameterInspection */ &$params)
     {
         $options['http']['timeout'] = $value;
     }
 
-    private function add_verify(RequestInterface $request, &$options, $value, &$params)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+    private function add_verify(/** @noinspection PhpUnusedParameterInspection */ RequestInterface $request, &$options, $value, /** @noinspection PhpUnusedParameterInspection */ &$params)
     {
         if ($value === true || is_string($value)) {
             $options['http']['verify_peer'] = true;
@@ -251,7 +256,8 @@ class StreamAdapter implements AdapterInterface
         }
     }
 
-    private function add_cert(RequestInterface $request, &$options, $value, &$params)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+    private function add_cert(/** @noinspection PhpUnusedParameterInspection */ RequestInterface $request, &$options, $value, &$params)
     {
         if (is_array($value)) {
             $options['http']['passphrase'] = $value[1];
@@ -265,9 +271,10 @@ class StreamAdapter implements AdapterInterface
         $options['http']['local_cert'] = $value;
     }
 
-    private function add_debug(RequestInterface $request, &$options, $value, &$params)
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+    private function add_debug(RequestInterface $request, /** @noinspection PhpUnusedParameterInspection */ &$options, $value, &$params)
     {
-        static $map = [
+        static $map = array(
             STREAM_NOTIFY_CONNECT       => 'CONNECT',
             STREAM_NOTIFY_AUTH_REQUIRED => 'AUTH_REQUIRED',
             STREAM_NOTIFY_AUTH_RESULT   => 'AUTH_RESULT',
@@ -278,10 +285,10 @@ class StreamAdapter implements AdapterInterface
             STREAM_NOTIFY_FAILURE       => 'FAILURE',
             STREAM_NOTIFY_COMPLETED     => 'COMPLETED',
             STREAM_NOTIFY_RESOLVE       => 'RESOLVE'
-        ];
+		);
 
-        static $args = ['severity', 'message', 'message_code',
-            'bytes_transferred', 'bytes_max'];
+        static $args = array('severity', 'message', 'message_code',
+            'bytes_transferred', 'bytes_max');
 
         if (!is_resource($value)) {
             $value = fopen('php://output', 'w');
@@ -303,7 +310,8 @@ class StreamAdapter implements AdapterInterface
         array &$options
     ) {
         // Overwrite any generated options with custom options
-        if ($custom = $request->getConfig()['stream_context']) {
+		$config = $request->getConfig();
+        if ($custom = $config['stream_context']) {
             if (!is_array($custom)) {
                 throw new AdapterException('stream_context must be an array');
             }

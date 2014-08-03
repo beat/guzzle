@@ -7,10 +7,10 @@ use GuzzleHttp\Stream\StreamInterface;
 abstract class AbstractMessage implements MessageInterface
 {
     /** @var array HTTP header collection */
-    private $headers = [];
+    private $headers = array();
 
     /** @var array mapping a lowercase header name to its name over the wire */
-    private $headerNames = [];
+    private $headerNames = array();
 
     /** @var StreamInterface Message body */
     private $body;
@@ -53,8 +53,8 @@ abstract class AbstractMessage implements MessageInterface
 
     public function addHeader($header, $value)
     {
-        static $valid = ['string' => true, 'integer' => true,
-            'double' => true, 'array' => true];
+        static $valid = array('string' => true, 'integer' => true,
+            'double' => true, 'array' => true);
 
         $type = gettype($value);
         if (!isset($valid[$type])) {
@@ -83,7 +83,7 @@ abstract class AbstractMessage implements MessageInterface
         $name = strtolower($header);
 
         if (!isset($this->headers[$name])) {
-            return $asArray ? [] : '';
+            return $asArray ? array() : '';
         }
 
         return $asArray
@@ -93,7 +93,7 @@ abstract class AbstractMessage implements MessageInterface
 
     public function getHeaders()
     {
-        $headers = [];
+        $headers = array();
         foreach ($this->headers as $name => $values) {
             $headers[$this->headerNames[$name]] = $values;
         }
@@ -109,11 +109,11 @@ abstract class AbstractMessage implements MessageInterface
 
         switch (gettype($value)) {
             case 'string':
-                $this->headers[$name] = [trim($value)];
+                $this->headers[$name] = array(trim($value));
                 break;
             case 'integer':
             case 'double':
-                $this->headers[$name] = [(string) $value];
+                $this->headers[$name] = array((string) $value);
                 break;
             case 'array':
                 foreach ($value as &$v) {
@@ -131,7 +131,7 @@ abstract class AbstractMessage implements MessageInterface
 
     public function setHeaders(array $headers)
     {
-        $this->headers = $this->headerNames = [];
+        $this->headers = $this->headerNames = array();
         foreach ($headers as $key => $value) {
             $this->setHeader($key, $value);
         }
@@ -166,10 +166,10 @@ abstract class AbstractMessage implements MessageInterface
     public static function parseHeader(MessageInterface $message, $header)
     {
         static $trimmed = "\"'  \n\t\r";
-        $params = $matches = [];
+        $params = $matches = array();
 
         foreach (self::normalizeHeader($message, $header) as $val) {
-            $part = [];
+            $part = array();
             foreach (preg_split('/;(?=([^"]*"[^"]*")*[^"]*$)/', $val) as $kvp) {
                 if (preg_match_all('/<[^>]+>|[^=]+/', $kvp, $matches)) {
                     $m = $matches[0];
