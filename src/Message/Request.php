@@ -1,5 +1,4 @@
 <?php
-
 namespace GuzzleHttp\Message;
 
 use GuzzleHttp\Event\Emitter;
@@ -191,12 +190,6 @@ class Request extends AbstractMessage implements RequestInterface
             $this->emitter = $options['emitter'];
             unset($options['emitter']);
         }
-    }
-
-    protected function getStartLine()
-    {
-        return trim($this->method . ' ' . $this->getResource())
-            . ' HTTP/' . $this->getProtocolVersion();
     }
 
     /**
