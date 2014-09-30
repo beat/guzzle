@@ -78,7 +78,7 @@ class Query extends Collection
         $result = '';
         $aggregator = $this->aggregator;
 
-        foreach ($aggregator($this->data) as $key => $values) {
+        foreach (call_user_func_array($aggregator, array($this->data)) as $key => $values) {
             foreach ($values as $value) {
                 if ($result) {
                     $result .= '&';
@@ -119,7 +119,7 @@ class Query extends Collection
      *
      * @return self
      */
-    public function setAggregator(callable $aggregator)
+    public function setAggregator($aggregator)
     {
         $this->aggregator = $aggregator;
 
@@ -196,12 +196,12 @@ class Query extends Collection
      *
      * @return array
      */
-    public static function walkQuery(array $query, $keyPrefix, callable $prefixer)
+    public static function walkQuery(array $query, $keyPrefix, $prefixer)
     {
         $result = array();
         foreach ($query as $key => $value) {
             if ($keyPrefix) {
-                $key = $prefixer($key, $keyPrefix);
+                $key = call_user_func_array($prefixer, array($key, $keyPrefix));
             }
             if (is_array($value)) {
                 $result += self::walkQuery($value, $key, $prefixer);

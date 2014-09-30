@@ -139,7 +139,7 @@ class StreamAdapter implements AdapterInterface
      * @return resource
      * @throws RequestException on error
      */
-    private function createResource(callable $callback, RequestInterface $request, $options)
+    private function createResource($callback, RequestInterface $request, $options)
     {
         // Turn off error reporting while we try to initiate the request
         $level = error_reporting(0);

@@ -20,7 +20,7 @@ interface EmitterInterface
      *     current highest priority plus one. Use "last" to set the priority to
      *     the current lowest event priority minus one.
      */
-    public function on($eventName, callable $listener, $priority = 0);
+    public function on($eventName, $listener, $priority = 0);
 
     /**
      * Binds a listener to a specific event. After the listener is triggered
@@ -31,7 +31,7 @@ interface EmitterInterface
      * @param int      $priority  The higher this value, the earlier an event
      *     listener will be triggered in the chain (defaults to 0)
      */
-    public function once($eventName, callable $listener, $priority = 0);
+    public function once($eventName, $listener, $priority = 0);
 
     /**
      * Removes an event listener from the specified event.
@@ -39,7 +39,7 @@ interface EmitterInterface
      * @param string   $eventName The event to remove a listener from
      * @param callable $listener  The listener to remove
      */
-    public function removeListener($eventName, callable $listener);
+    public function removeListener($eventName, $listener);
 
     /**
      * Gets the listeners of a specific event or all listeners if no event is

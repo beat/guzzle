@@ -296,11 +296,11 @@ class Collection implements
      *
      * @return Collection
      */
-    public function map(callable $closure, array $context = array())
+    public function map($closure, array $context = array())
     {
         $collection = new static();
         foreach ($this as $key => $value) {
-            $collection[$key] = $closure($key, $value, $context);
+            $collection[$key] = call_user_func_array($closure, array($key, $value, $context));
         }
 
         return $collection;
@@ -319,11 +319,11 @@ class Collection implements
      *
      * @return Collection
      */
-    public function filter(callable $closure)
+    public function filter($closure)
     {
         $collection = new static();
         foreach ($this->data as $key => $value) {
-            if ($closure($key, $value)) {
+            if (call_user_func_array($closure, array($key, $value))) {
                 $collection[$key] = $value;
             }
         }

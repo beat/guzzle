@@ -52,7 +52,7 @@ class PostBody implements PostBodyInterface
         return $this;
     }
 
-    public function setAggregator(callable $aggregator)
+    public function setAggregator($aggregator)
     {
         $this->aggregator = $aggregator;
     }

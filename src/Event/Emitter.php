@@ -25,7 +25,7 @@ class Emitter implements EmitterInterface
     /** @var array */
     private $sorted = array();
 
-    public function on($eventName, callable $listener, $priority = 0)
+    public function on($eventName, $listener, $priority = 0)
     {
         if ($priority === 'first') {
             $priority = isset($this->listeners[$eventName])
@@ -41,7 +41,7 @@ class Emitter implements EmitterInterface
         unset($this->sorted[$eventName]);
     }
 
-    public function once($eventName, callable $listener, $priority = 0)
+    public function once($eventName, $listener, $priority = 0)
     {
 		$that	=	$this;
         $onceListener = function (
@@ -49,13 +49,13 @@ class Emitter implements EmitterInterface
             $eventName
         ) use (&$onceListener, $eventName, $listener, $priority, $that) {
             $that->removeListener($eventName, $onceListener);
-            $listener($event, $eventName, $that);
+            call_user_func_array($listener, array($event, $eventName, $that));
         };
 
         $this->on($eventName, $onceListener, $priority);
     }
 
-    public function removeListener($eventName, callable $listener)
+    public function removeListener($eventName, $listener)
     {
         if (!isset($this->listeners[$eventName])) {
             return;
@@ -103,7 +103,7 @@ class Emitter implements EmitterInterface
     {
         if (isset($this->listeners[$eventName])) {
             foreach ($this->listeners($eventName) as $listener) {
-                $listener($event, $eventName);
+                call_user_func_array($listener, array($event, $eventName));
                 if ($event->isPropagationStopped()) {
                     break;
                 }

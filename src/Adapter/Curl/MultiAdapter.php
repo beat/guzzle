@@ -192,7 +192,7 @@ class MultiAdapter implements AdapterInterface, ParallelAdapterInterface
                 $factory = $this->curlFactory;
                 $context->addTransaction(
                     $transaction,
-                    $factory($transaction, $this->messageFactory)
+                    call_user_func_array($factory, array($transaction, $this->messageFactory))
                 );
             }
         } catch (RequestException $e) {

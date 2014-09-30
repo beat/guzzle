@@ -37,8 +37,8 @@ class QueryParser
         foreach (explode('&', $str) as $kvp) {
 
             $parts = explode('=', $kvp, 2);
-            $key = $decoder($parts[0]);
-            $value = isset($parts[1]) ? $decoder($parts[1]) : null;
+            $key = call_user_func_array($decoder, array($parts[0]));
+            $value = isset($parts[1]) ? call_user_func_array($decoder, array($parts[1])) : null;
 
             // Special handling needs to be taken for PHP nested array syntax
             if (strpos($key, '[') !== false) {

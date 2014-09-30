@@ -77,11 +77,11 @@ class CurlAdapter implements AdapterInterface
         }
 
         $factory = $this->curlFactory;
-        $handle = $factory(
+        $handle = call_user_func_array($factory, array(
             $transaction,
             $this->messageFactory,
             $this->checkoutEasyHandle()
-        );
+        ));
 
         curl_exec($handle);
         $info = curl_getinfo($handle);

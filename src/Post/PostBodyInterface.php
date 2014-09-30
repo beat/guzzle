@@ -37,7 +37,7 @@ interface PostBodyInterface extends StreamInterface, \Countable
      *
      * @param callable $aggregator
      */
-    public function setAggregator(callable $aggregator);
+    public function setAggregator($aggregator);
 
     /**
      * Set to true to force a multipart upload even if there are no files.
