@@ -289,7 +289,9 @@ class CurlFactory
         $options[CURLOPT_SSLKEY] = $value;
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_stream(
+		/** @noinspection PhpUnusedParameterInspection */
         RequestInterface $request,
         RequestMediator $mediator,
         &$options,
@@ -322,8 +324,10 @@ class CurlFactory
             : Stream::factory($value));
     }
 
+	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_decode_content(
         RequestInterface $request,
+		/** @noinspection PhpUnusedParameterInspection */
         RequestMediator $mediator,
         &$options,
 		/** @noinspection PhpUnusedParameterInspection */
