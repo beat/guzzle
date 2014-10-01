@@ -120,6 +120,7 @@ class RequestException extends TransferException
             return $this->emittedErrorEvent;
         } elseif ($value === true) {
             $this->emittedErrorEvent = true;
+			return null;		//BB was missing for php-lint
         } else {
             throw new \InvalidArgumentException('You cannot set the emitted '
                 . 'error value to false.');

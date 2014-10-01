@@ -10,7 +10,7 @@ use GuzzleHttp\Message\MessageFactoryInterface;
 use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Stream\InflateStream;
 use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Stream\LazyOpenStream;
+//unused: use GuzzleHttp\Stream\LazyOpenStream;
 use GuzzleHttp\Stream\StreamInterface;
 use GuzzleHttp\Stream\Utils;
 
@@ -224,7 +224,7 @@ class StreamAdapter implements AdapterInterface
     {
         $headers = AbstractMessage::getHeadersAsString($request);
 
-        return array(
+		$context = array(
             'http' => array(
                 'method'           => $request->getMethod(),
                 'header'           => trim($headers),
