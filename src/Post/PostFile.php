@@ -5,6 +5,7 @@ namespace GuzzleHttp\Post;
 use GuzzleHttp\Mimetypes;
 use GuzzleHttp\Stream\MetadataStreamInterface;
 use GuzzleHttp\Stream\StreamInterface;
+use GuzzleHttp\Stream\Stream;
 
 /**
  * Post file upload
@@ -21,9 +22,9 @@ class PostFile implements PostFileInterface
     private $headers = array();
 
     /**
-     * @param null            $name     Name of the form field
+     * @param string          $name     Name of the form field
      * @param mixed           $content  Data to send
-     * @param null            $filename Filename content-disposition attribute
+     * @param string|null     $filename Filename content-disposition attribute
      * @param array           $headers  Array of headers to set on the file
      *                                  (can override any default headers)
      * @throws \RuntimeException when filename is not passed or can't be determined
@@ -71,7 +72,7 @@ class PostFile implements PostFileInterface
         $this->content = $content;
 
         if (!($this->content instanceof StreamInterface)) {
-            $this->content = \GuzzleHttp\Stream\create($this->content);
+            $this->content = Stream::factory($this->content);
         } elseif ($this->content instanceof MultipartBody) {
             if (!$this->hasHeader('Content-Disposition')) {
                 $disposition = 'form-data; name="' . $this->name .'"';
@@ -115,9 +116,9 @@ class PostFile implements PostFileInterface
         // Set a default content-disposition header if one was no provided
         if (!$this->hasHeader('Content-Disposition')) {
             $this->headers['Content-Disposition'] = sprintf(
-                'form-data; filename="%s"; name="%s"',
-                basename($this->filename),
-                $this->name
+                'form-data; name="%s"; filename="%s"',
+                $this->name,
+                basename($this->filename)
             );
         }
 

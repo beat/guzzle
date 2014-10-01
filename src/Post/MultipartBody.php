@@ -2,16 +2,16 @@
 
 namespace GuzzleHttp\Post;
 
-use GuzzleHttp\Stream;
-use GuzzleHttp\Stream\MetadataStreamInterface;
+use GuzzleHttp\Stream\AppendStream;
 use GuzzleHttp\Stream\StreamInterface;
+use GuzzleHttp\Stream\Stream;
 
 /**
  * Stream that when read returns bytes for a streaming multipart/form-data body
  */
-class MultipartBody implements Stream\StreamInterface
+class MultipartBody implements StreamInterface
 {
-    //BB use Stream\StreamDecoratorTrait;
+    //BB use StreamDecoratorTrait;
 
 	/** @var StreamInterface Decorated stream */
 	private $stream;
@@ -131,7 +131,7 @@ class MultipartBody implements Stream\StreamInterface
 
     /**
      * @param array  $fields   Associative array of field names to values where
-     *                         each value is a string.
+     *                         each value is a string or array of strings.
      * @param array  $files    Associative array of PostFileInterface objects
      * @param string $boundary You can optionally provide a specific boundary
      * @throws \InvalidArgumentException
@@ -191,12 +191,14 @@ class MultipartBody implements Stream\StreamInterface
      */
     private function createStream(array $fields, array $files)
     {
-        $stream = new Stream\AppendStream();
+        $stream = new AppendStream();
 
-        foreach ($fields as $name => $field) {
-            $stream->addStream(
-                Stream\create($this->getFieldString($name, $field))
-            );
+        foreach ($fields as $name => $fieldValues) {
+            foreach ((array) $fieldValues as $value) {
+                $stream->addStream(
+                    Stream::factory($this->getFieldString($name, $value))
+                );
+            }
         }
 
         foreach ($files as $file) {
@@ -207,14 +209,14 @@ class MultipartBody implements Stream\StreamInterface
             }
 
             $stream->addStream(
-                Stream\create($this->getFileHeaders($file))
+                Stream::factory($this->getFileHeaders($file))
             );
             $stream->addStream($file->getContent());
-            $stream->addStream(Stream\create("\r\n"));
+            $stream->addStream(Stream::factory("\r\n"));
         }
 
         // Add the trailing boundary
-        $stream->addStream(Stream\create("--{$this->boundary}--"));
+        $stream->addStream(Stream::factory("--{$this->boundary}--"));
 
         return $stream;
     }

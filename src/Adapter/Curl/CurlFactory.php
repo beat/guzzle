@@ -5,7 +5,8 @@ namespace GuzzleHttp\Adapter\Curl;
 use GuzzleHttp\Adapter\TransactionInterface;
 use GuzzleHttp\Message\MessageFactoryInterface;
 use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Stream;
+use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Stream\LazyOpenStream;
 use GuzzleHttp\Exception\AdapterException;
 
 /**
@@ -85,12 +86,9 @@ class CurlFactory
             $options[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
         }
 
-        // Add CURLOPT_ENCODING if Accept-Encoding header is provided
-        if ($request->hasHeader('Accept-Encoding')) {
-            $options[CURLOPT_ENCODING] = $request->getHeader('Accept-Encoding');
-            // Let cURL set the Accept-Encoding header. Without this change
-            // curl could add a duplicate value.
-            $this->removeHeader('Accept-Encoding', $options);
+        // cURL sometimes adds a content-type by default. Prevent this.
+        if (!$request->hasHeader('Content-Type')) {
+            $options[CURLOPT_HTTPHEADER][] = 'Content-Type:';
         }
 
         return $options;
@@ -291,6 +289,26 @@ class CurlFactory
         $options[CURLOPT_SSLKEY] = $value;
     }
 
+    private function add_stream(
+        RequestInterface $request,
+        RequestMediator $mediator,
+        &$options,
+        $value
+    ) {
+        if ($value === false) {
+            return;
+        }
+
+        throw new AdapterException('cURL adapters do not support the "stream"'
+            . ' request option. This error is typically encountered when trying'
+            . ' to send requests with the "stream" option set to true in '
+            . ' parallel. You will either need to send these one at a time or'
+            . ' implement a custom ParallelAdapterInterface that supports'
+            . ' sending these types of requests in parallel. This error can'
+            . ' also occur if the StreamAdapter is not available on your'
+            . ' system (e.g., allow_url_fopen is disabled in your php.ini).');
+    }
+
 	/** @noinspection PhpUnusedPrivateMethodInspection */
     private function add_save_to(
 		/** @noinspection PhpUnusedParameterInspection */
@@ -300,8 +318,24 @@ class CurlFactory
         $value
     ) {
         $mediator->setResponseBody(is_string($value)
-            ? new Stream\LazyOpenStream($value, 'w')
-            : Stream\create($value));
+            ? new LazyOpenStream($value, 'w')
+            : Stream::factory($value));
+    }
+
+    private function add_decode_content(
+        RequestInterface $request,
+        RequestMediator $mediator,
+        &$options,
+		/** @noinspection PhpUnusedParameterInspection */
+		$value
+    ) {
+        if (!$request->hasHeader('Accept-Encoding')) {
+            $options[CURLOPT_ENCODING] = '';
+            // Don't let curl send the header over the wire
+            $options[CURLOPT_HTTPHEADER][] = 'Accept-Encoding:';
+        } else {
+            $options[CURLOPT_ENCODING] = $request->getHeader('Accept-Encoding');
+        }
     }
 
     /**
