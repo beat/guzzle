@@ -9,3 +9,10 @@ docs/_build
 docs/*.pyc
 .idea
 .DS_STORE
+src/Command
+src/Stream
+src/Subscriber/Log
+src/Subscriber/MessageIntegrity
+src/Subscriber/Oauth
+src/Subscriber/Progress
+src/Subscriber/Retry
