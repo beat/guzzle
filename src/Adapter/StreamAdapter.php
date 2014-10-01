@@ -99,7 +99,8 @@ class StreamAdapter implements AdapterInterface
         }
 
         // Drain the stream immediately if 'stream' was not enabled.
-        if (!$request->getConfig()['stream']) {
+		$requestConfig = $request->getConfig();
+        if (!$requestConfig['stream']) {
             $stream = $this->getSaveToBody($request, $stream);
         }
 

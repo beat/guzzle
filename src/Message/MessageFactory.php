@@ -447,6 +447,7 @@ class MessageFactory implements MessageFactoryInterface
             $request->setHeader('Accept-Encoding', $value);
         }
 
-        $request->getConfig()['decode_content'] = true;
+        $requestConfig = $request->getConfig();
+        $requestConfig['decode_content'] = true;
     }
 }
